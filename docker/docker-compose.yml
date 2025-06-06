@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  backend:
+    build:
+      context: ../backend         # backend source folder relative to docker-compose.yml location
+      dockerfile: ../docker/backend.Dockerfile  # dockerfile location relative to docker-compose.yml
+    container_name: backend
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../docker/frontend.Dockerfile
+    container_name: frontend
+    ports:
+      - "5173:5173"
+
+  nginx:
+    build:
+      context: ./nginx            # nginx folder inside docker folder
+      dockerfile: Dockerfile
+    container_name: my-nginx-ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
