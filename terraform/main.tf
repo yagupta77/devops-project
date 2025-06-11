@@ -2,11 +2,30 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-resource "aws_instance" "demo_instance" {
-  ami           = "ami-0ded8326293d3201b" # Amazon Linux 2 AMI (Mumbai) — check current ID
-  instance_type = "t2.micro"
+resource "aws_iam_user" "jenkins_user" {
+  name = "jenkins-demo-user"
+}
 
-  tags = {
-    Name = "Yash-EC2-Demo"
-  }
+resource "aws_iam_policy" "jenkins_policy" {
+  name        = "jenkins-policy"
+  description = "Custom policy for Jenkins-created user"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "s3:ListBucket",
+          "ec2:Describe*"
+        ],
+        Effect   = "Allow",
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_user_policy_attachment" "attach_policy" {
+  user       = aws_iam_user.jenkins_user.name
+  policy_arn = aws_iam_policy.jenkins_policy.arn
 }
