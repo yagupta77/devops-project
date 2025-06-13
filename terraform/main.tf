@@ -1,31 +1,20 @@
+# Use AWS provider
 provider "aws" {
-  region = "ap-south-1"
+  region = "ap-south-1" # Mumbai (you can change this if needed)
 }
 
-resource "aws_iam_user" "jenkins_user" {
-  name = "jenkins-demo-user"
+# Create a private S3 bucket
+resource "aws_s3_bucket" "example" {
+  bucket = "yagupta77-terraform-bucket-${random_id.suffix.hex}"
+  acl    = "private"
+
+  tags = {
+    Name        = "Terraform S3 Bucket"
+    Environment = "Dev"
+  }
 }
 
-resource "aws_iam_policy" "jenkins_policy" {
-  name        = "jenkins-policy"
-  description = "Custom policy for Jenkins-created user"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "s3:ListBucket",
-          "ec2:Describe*"
-        ],
-        Effect   = "Allow",
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_user_policy_attachment" "attach_policy" {
-  user       = aws_iam_user.jenkins_user.name
-  policy_arn = aws_iam_policy.jenkins_policy.arn
+# Random ID to make bucket name unique
+resource "random_id" "suffix" {
+  byte_length = 4
 }
